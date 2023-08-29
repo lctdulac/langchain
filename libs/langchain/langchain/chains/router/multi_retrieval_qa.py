@@ -41,6 +41,8 @@ class MultiRetrievalQAChain(MultiRouteChain):
         default_retriever: Optional[BaseRetriever] = None,
         default_prompt: Optional[PromptTemplate] = None,
         default_chain: Optional[Chain] = None,
+        # EDIT
+        return_source_documents: bool = False,
         **kwargs: Any,
     ) -> MultiRetrievalQAChain:
         if default_prompt and not default_retriever:
@@ -63,7 +65,8 @@ class MultiRetrievalQAChain(MultiRouteChain):
         for r_info in retriever_infos:
             prompt = r_info.get("prompt")
             retriever = r_info["retriever"]
-            chain = RetrievalQA.from_llm(llm, prompt=prompt, retriever=retriever)
+            # EDIT
+            chain = RetrievalQA.from_llm(llm, prompt=prompt, retriever=retriever, return_source_documents=return_source_documents)
             name = r_info["name"]
             destination_chains[name] = chain
         if default_chain:

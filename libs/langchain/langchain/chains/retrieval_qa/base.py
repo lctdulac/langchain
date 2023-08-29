@@ -30,6 +30,8 @@ class BaseRetrievalQA(Chain):
     combine_documents_chain: BaseCombineDocumentsChain
     """Chain to use to combine the documents."""
     input_key: str = "query"  #: :meta private:
+    # EDIT
+    query_input_name: str
     output_key: str = "result"  #: :meta private:
     return_source_documents: bool = False
     """Return the source documents or not."""
@@ -37,7 +39,7 @@ class BaseRetrievalQA(Chain):
     class Config:
         """Configuration for this pydantic object."""
 
-        extra = Extra.forbid
+        extra = Extra.allow
         arbitrary_types_allowed = True
         allow_population_by_field_name = True
 
@@ -65,6 +67,8 @@ class BaseRetrievalQA(Chain):
         cls,
         llm: BaseLanguageModel,
         prompt: Optional[PromptTemplate] = None,
+        # EDIT
+        query_input_name = "question",
         callbacks: Callbacks = None,
         **kwargs: Any,
     ) -> BaseRetrievalQA:
@@ -84,6 +88,8 @@ class BaseRetrievalQA(Chain):
         return cls(
             combine_documents_chain=combine_documents_chain,
             callbacks=callbacks,
+            # EDIT
+            query_input_name=query_input_name,
             **kwargs,
         )
 
@@ -136,8 +142,14 @@ class BaseRetrievalQA(Chain):
             docs = self._get_docs(question, run_manager=_run_manager)
         else:
             docs = self._get_docs(question)  # type: ignore[call-arg]
+
+        # EDIT: get other inputs
+        other_inputs = [inp for inp in self.combine_documents_chain.llm_chain.input_keys if inp not in ['context', self.query_input_name]]
+        print("OTHER INPUTS", other_inputs, "will use kwargs:", {inp: inputs[inp] for inp in other_inputs})
+        print(f"NOTE: It doesn't use {self.query_input_name}")
         answer = self.combine_documents_chain.run(
-            input_documents=docs, question=question, callbacks=_run_manager.get_child()
+            **{inp: inputs[inp] for inp in other_inputs},
+            input_documents=docs, question=question, callbacks=_run_manager.get_child(),
         )
 
         if self.return_source_documents:

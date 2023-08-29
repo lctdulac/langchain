@@ -167,6 +167,8 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
     def _validate_inputs(self, inputs: Dict[str, Any]) -> None:
         """Check that all inputs are present."""
         missing_keys = set(self.input_keys).difference(inputs)
+        print(f"VALIDATION INPUT KEYS: {set(self.input_keys)}")
+        print(f"VALIDATION INPUTS: {inputs}")
         if missing_keys:
             raise ValueError(f"Missing some input keys: {missing_keys}")
 
