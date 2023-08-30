@@ -99,6 +99,8 @@ class BaseRetrievalQA(Chain):
         llm: BaseLanguageModel,
         chain_type: str = "stuff",
         chain_type_kwargs: Optional[dict] = None,
+        # EDIT
+        query_input_name = "question",
         **kwargs: Any,
     ) -> BaseRetrievalQA:
         """Load chain from chain type."""
@@ -106,7 +108,11 @@ class BaseRetrievalQA(Chain):
         combine_documents_chain = load_qa_chain(
             llm, chain_type=chain_type, **_chain_type_kwargs
         )
-        return cls(combine_documents_chain=combine_documents_chain, **kwargs)
+        return cls(combine_documents_chain=combine_documents_chain, 
+            # EDIT
+            query_input_name=query_input_name,
+            **kwargs
+        )
 
     @abstractmethod
     def _get_docs(
